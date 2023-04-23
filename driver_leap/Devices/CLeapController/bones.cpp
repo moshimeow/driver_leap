@@ -1,6 +1,5 @@
 #include "bones.h"
 #include "tracking/t_hand_tracking.h"
-#include "util/u_hand_tracking.h"
 #include "math/m_api.h"
 #include "math/m_vec3.h"
 
@@ -57,132 +56,19 @@ MetacarpalJointsToBoneTransform(struct xrt_hand_joint_set *hand_joint_set,
          * the regular metacarpal orientations and rotated them by that quat, everything would work.
          */
         xrt_quat magic_prerotate = XRT_QUAT_IDENTITY;
+        magic_prerotate.w = 0.5;
+        magic_prerotate.x = 0.5;
+        magic_prerotate.y = -0.5;
+        magic_prerotate.z = 0.5;
 
-        if (role == vr::TrackedControllerRole_LeftHand) {
-            magic_prerotate.w = 0.5;
-            magic_prerotate.x = 0.5;
-            magic_prerotate.y = -0.5;
-            magic_prerotate.z = 0.5;
-        } else {
-            #if 0
-            // Mostly works but clear issues
-            magic_prerotate.w = 0.5;
-            magic_prerotate.x = -0.5;
-            magic_prerotate.y = 0.5;
-            magic_prerotate.z = 0.5;
-            #elif 0
-            // Did not work - fingers weren't squished together but they were rotated 180 degrees around X axis
-            magic_prerotate.w = 0.5;
-            magic_prerotate.x = 0.5;
-            magic_prerotate.y = -0.5;
-            magic_prerotate.z = 0.5;
-            std::swap(diff_openvr.w, diff_openvr.x);
-
-
-            #elif 0
-            // Did not work - fingers were rotated 180 degrees and squished
-            magic_prerotate.w = 0.5;
-            magic_prerotate.x = 0.5;
-            magic_prerotate.y = -0.5;
-            magic_prerotate.z = 0.5;
-            std::swap(diff_openvr.y, diff_openvr.z);
-
-            #elif 0
-            // Did not work - fingers were rotated 180deg about the line from wrist to middle-pxm
-            magic_prerotate.w = 0.5;
-            magic_prerotate.x = -0.5;
-            magic_prerotate.y = 0.5;
-            magic_prerotate.z = 0.5;
-            std::swap(diff_openvr.w, diff_openvr.x);
-
-            #elif 0
-            // Did not work, still worse than the original, but not totally awful...
-            magic_prerotate.w = 0.5;
-            magic_prerotate.x = -0.5;
-            magic_prerotate.y = 0.5;
-            magic_prerotate.z = 0.5;
-            std::swap(diff_openvr.y, diff_openvr.z);
-
-            #elif 0
-            // This one is really odd..
-            magic_prerotate.w = 0.5;
-            magic_prerotate.x = -0.5;
-            magic_prerotate.y = 0.5;
-            magic_prerotate.z = 0.5;
-            std::swap(diff_openvr.y, diff_openvr.x);
-
-            #elif 0
-            // Similarly odd
-            magic_prerotate.w = 0.5;
-            magic_prerotate.x = -0.5;
-            magic_prerotate.y = 0.5;
-            magic_prerotate.z = 0.5;
-            std::swap(diff_openvr.z, diff_openvr.x);
-
-            #else
-            // Give up
-            magic_prerotate.w = 0.5;
-            magic_prerotate.x = -0.5;
-            magic_prerotate.y = 0.5;
-            magic_prerotate.z = 0.5;
-
-            #endif
+        if (role == vr::TrackedControllerRole_RightHand)
+        {
+            magic_prerotate.y *= -1.f;
+            magic_prerotate.x *= -1.f;
         }
-
-        // if (role == vr::TrackedControllerRole_RightHand)
-        // {
-        //     magic_prerotate.y *= -1.f;
-        //     magic_prerotate.x *= -1.f;
-        //     // std::swap(magic_prerotate.y, magic_prerotate.z);
-        // }
 
         xrt_quat final_diff;
         math_quat_rotate(&magic_prerotate, &diff_openvr, &final_diff);
-
-        if (role == vr::TrackedControllerRole_RightHand) {
-            #if 0
-            // Nope
-            std::swap(final_diff.x, final_diff.w);
-
-            #elif 0
-            // Nope
-            std::swap(final_diff.y, final_diff.z);
-            #elif 0
-            // Nope
-            std::swap(final_diff.x, final_diff.z);
-            #elif 0
-            // Nope
-            std::swap(final_diff.x, final_diff.y);
-            #elif 0
-            // Maybe it's a change of basis?
-            // Well if so, not this one.
-            final_diff.y = -final_diff.y;
-            final_diff.w = -final_diff.w;
-
-            #elif 0
-
-            // Haven't tested this one yet
-
-            xrt_vec3 x = XRT_VEC3_UNIT_X;
-            xrt_vec3 z = XRT_VEC3_UNIT_Z;
-
-            math_quat_rotate_vec3(final_diff, &x, &x);
-            math_quat_rotate_vec3(final_diff, &z, &z);
-
-            // This is a very squashed change-of-basis from left-handed coordinate systems to right-handed coordinate
-            // systems: you multiply everything by (-1 0 0) then negate the X axis.
-
-
-
-            x.y *= -1;
-            x.z *= -1;
-
-            z.x *= -1;
-
-            math_quat_from_plus_x_z(&x, &z, out);
-            
-            #endif
-        }
         convert_quaternion(final_diff, out_bone_transforms[joint].orientation);
 
         xrt_vec3 global_diff_from_this_to_parent =
