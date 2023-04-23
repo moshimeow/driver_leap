@@ -86,6 +86,7 @@ MetacarpalJointsToBoneTransform(struct xrt_hand_joint_set *hand_joint_set,
 
         if (role == vr::TrackedControllerRole_RightHand)
         {
+            out_bone_transforms[joint].position.v[0] *= -1.f;
             out_bone_transforms[joint].position.v[1] *= -1.f;
         }
     }
