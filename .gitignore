@@ -8,3 +8,4 @@ ipch
 *.opendb
 *.VC.db
 bin
+build/
