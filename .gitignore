@@ -9,3 +9,5 @@ ipch
 *.VC.db
 bin
 build/
+packages/
+vcpkg_installed/
