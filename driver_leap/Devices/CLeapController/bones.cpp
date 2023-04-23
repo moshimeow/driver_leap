@@ -1,5 +1,6 @@
 #include "bones.h"
 #include "tracking/t_hand_tracking.h"
+#include "util/u_hand_tracking.h"
 #include "math/m_api.h"
 #include "math/m_vec3.h"
 
