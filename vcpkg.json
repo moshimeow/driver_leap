@@ -1,0 +1,19 @@
+{
+    "name": "mercury",
+    "homepage": "https://monado.freedesktop.org",
+    "version-string": "21.0",
+    "dependencies": [
+
+        {
+            "name": "pthreads",
+            "platform": "windows"
+        },
+        "cjson",
+        "eigen3",
+        "glslang",
+        "vulkan",
+        "sdl2",
+        "opencv",
+        "openvr"
+    ]
+}
